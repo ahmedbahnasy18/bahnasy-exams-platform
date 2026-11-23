@@ -32,6 +32,20 @@
 
     html, body {
       overflow-x: hidden;
+      scroll-behavior: auto;
+    }
+    body, #examScreen, #mcqSection, #essaySection { overflow-anchor: none; }
+    .student-exam-banner {
+      background: linear-gradient(135deg, #f0fdf4 0%, #fffbeb 100%);
+      border: 1.5px solid var(--gold);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
     body {
@@ -911,18 +925,32 @@
         </div>
       </div>
 
+      <div id="studentExamWrap" style="margin-bottom: 14px;">
+        <div id="studentExamBanner" class="student-exam-banner">
+          <div>
+            <div id="lblActiveExamTitle" style="font-size:0.78rem; color:var(--text-muted); font-weight:800;">الاختبار المتاح حالياً:</div>
+            <div id="studentExamTitleText" style="font-size:1rem; font-weight:900; color:var(--bg-emerald-dark);">جاري تحميل الاختبارات...</div>
+          </div>
+          <span id="studentExamMetaBadge" style="font-size:0.8rem; font-weight:800; background:var(--bg-emerald-dark); color:var(--gold); padding:4px 12px; border-radius:20px;"></span>
+        </div>
+        <div id="studentExamSelectWrap" class="input-group hidden" style="margin-top:8px;">
+          <label for="studentExamSelect" id="lblChooseExam">اختر الاختبار المطلوب *</label>
+          <select id="studentExamSelect"></select>
+        </div>
+      </div>
+
       <div class="form-grid">
         <div class="input-group">
           <label for="studentName" id="lblName">اسم الطالب *</label>
-          <input type="text" id="studentName" placeholder="مثال: أحمد محمد محمود" />
+          <input type="text" id="studentName" autocomplete="off" placeholder="مثال: أحمد محمد محمود" />
         </div>
         <div class="input-group">
           <label for="studentCode" id="lblPhone">رقم التليفون / الواتساب *</label>
-          <input type="tel" id="studentCode" inputmode="numeric" maxlength="11" placeholder="مثال: 01012345678" />
+          <input type="tel" id="studentCode" autocomplete="off" inputmode="numeric" maxlength="11" placeholder="مثال: 01012345678" />
         </div>
         <div class="input-group">
           <label for="studentGroup" id="lblGroup">المجموعة / الموعد *</label>
-          <input type="text" id="studentGroup" placeholder="مثال: مجموعة السبت 6 مساءً" />
+          <input type="text" id="studentGroup" autocomplete="off" placeholder="مثال: مجموعة السبت 6 مساءً" />
         </div>
       </div>
 
@@ -1001,21 +1029,31 @@
         <button id="exitAdminBtn" class="btn btn-secondary btn-sm" type="button">العودة لواجهة الطالب ⬅</button>
       </div>
 
-      <!-- Track Selector for Admin -->
-      <div class="form-grid" style="background: #f4f7f4; padding: 12px 14px; border-radius: 10px; margin-bottom: 16px;">
-        <div class="input-group">
-          <label for="adminGradeSelect">إدارة الصف الدراسي:</label>
-          <select id="adminGradeSelect">
-            <option value="2nd">الصف الثاني بكالوريا (2nd Baccalaureate)</option>
-            <option value="1st">الصف الأول الثانوي (1st Secondary)</option>
-          </select>
+      <!-- Track & Exam Selector for Admin -->
+      <div style="background: #f4f7f4; padding: 12px 14px; border-radius: 10px; margin-bottom: 16px; border: 1px solid #dbe2dc;">
+        <div class="form-grid" style="margin-bottom: 10px;">
+          <div class="input-group">
+            <label for="adminGradeSelect">إدارة الصف الدراسي:</label>
+            <select id="adminGradeSelect">
+              <option value="2nd">الصف الثاني بكالوريا (2nd Baccalaureate)</option>
+              <option value="1st">الصف الأول الثانوي (1st Secondary)</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="adminTrackSelect">إدارة الشعبة:</label>
+            <select id="adminTrackSelect">
+              <option value="ar">عربي (Arabic Track)</option>
+              <option value="en">لغات (Languages / English)</option>
+            </select>
+          </div>
         </div>
-        <div class="input-group">
-          <label for="adminTrackSelect">إدارة الشعبة:</label>
-          <select id="adminTrackSelect">
-            <option value="ar">عربي (Arabic Track)</option>
-            <option value="en">لغات (Languages / English)</option>
-          </select>
+        <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; border-top:1px dashed #cbd5e1; padding-top:10px;">
+          <div class="input-group" style="flex:1; min-width:220px; margin-bottom:0;">
+            <label for="adminExamSelect">الاختبار الحالي داخل هذه الشعبة:</label>
+            <select id="adminExamSelect"></select>
+          </div>
+          <button id="createNewExamBtn" class="btn btn-primary btn-sm" type="button" style="white-space:nowrap;">➕ إنشاء اختبار جديد</button>
+          <span id="adminExamIdBadge" style="font-size:0.78rem; font-weight:900; background:var(--bg-emerald-dark); color:var(--gold); padding:8px 12px; border-radius:8px; direction:ltr;">ID: 2nd_ar</span>
         </div>
       </div>
 
@@ -1051,6 +1089,10 @@
           <div class="input-group">
             <label for="cfgEssayPoints">درجة كل سؤال مقالي (Essay):</label>
             <input type="number" id="cfgEssayPoints" min="0.5" max="20" step="0.5" value="2" />
+          </div>
+          <div class="input-group">
+            <label for="cfgMaxAttempts">الحد الأقصى للمحاولات برقم الهاتف (0 = مفتوح):</label>
+            <input type="number" id="cfgMaxAttempts" min="0" max="50" value="1" />
           </div>
           <div class="input-group">
             <label for="cfgStatus">حالة الامتحان للطلاب:</label>
@@ -1353,6 +1395,9 @@
       grade: '2nd',
       track: 'ar',
       trackKey: '2nd_ar',
+      examId: '2nd_ar',
+      examTitle: '',
+      availableExams: [],
       student: { name: '', code: '', group: '' },
       mcqs: [],
       essays: [],
@@ -1454,17 +1499,131 @@
       document.getElementById('resumeText').textContent = dict.resumeMsg;
       document.getElementById('resumeBtn').textContent = dict.resumeBtn;
       document.getElementById('discardResumeBtn').textContent = dict.discardBtn;
+      refreshStudentExamList();
+      checkSavedDraft();
+    }
 
+    function updateSelectedExamBanner(exObj) {
+      var titleEl = document.getElementById('studentExamTitleText');
+      var metaEl = document.getElementById('studentExamMetaBadge');
+      if (!exObj) {
+        state.examId = state.trackKey;
+        state.examTitle = '';
+        titleEl.textContent = state.track === 'ar' ? 'لا توجد اختبارات مفتوحة حالياً لهذا المسار' : 'No open exams currently for this track';
+        metaEl.textContent = state.track === 'ar' ? 'مغلق' : 'Closed';
+        return;
+      }
+      state.examId = exObj.examId || state.trackKey;
+      state.examTitle = exObj.title || state.trackKey;
+      titleEl.textContent = state.examTitle;
+      var durTxt = (exObj.durationMinutes || 30) + (state.track === 'ar' ? ' دقيقة' : ' min');
+      var att = Number(exObj.maxAttempts !== undefined ? exObj.maxAttempts : 1);
+      var attTxt = att === 0
+        ? (state.track === 'ar' ? 'محاولات مفتوحة' : 'Unlimited')
+        : (att + (state.track === 'ar' ? ' محاولة' : ' attempt(s)'));
+      metaEl.textContent = durTxt + ' • ' + attTxt;
+      checkSavedDraft();
+    }
 
+    function refreshStudentExamList() {
+      var selWrap = document.getElementById('studentExamSelectWrap');
+      if (!APPS_SCRIPT_URL) {
+        var localEx = Object.keys(adminState.configs).map(function(k) {
+          var c = adminState.configs[k];
+          return Object.assign({ examId: k, trackKey: c.trackKey || k }, c);
+        }).filter(function(c) { return c.trackKey === state.trackKey && c.status !== 'closed'; });
+        state.availableExams = localEx;
+        renderExamSelectorUI(localEx);
+        return;
+      }
+      document.getElementById('studentExamTitleText').textContent = state.track === 'ar' ? 'جاري تحميل الاختبارات...' : 'Loading exams...';
+      fetch(APPS_SCRIPT_URL + '?action=list_exams&track=' + encodeURIComponent(state.trackKey))
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+          var list = (res && res.exams) ? res.exams : [];
+          state.availableExams = list;
+          renderExamSelectorUI(list);
+        })
+        .catch(function() {
+          selWrap.classList.add('hidden');
+          updateSelectedExamBanner(adminState.configs[state.trackKey] || { examId: state.trackKey, title: state.trackKey, durationMinutes: 30, maxAttempts: 1 });
+        });
+    }
+
+    function renderExamSelectorUI(list) {
+      var selWrap = document.getElementById('studentExamSelectWrap');
+      var sel = document.getElementById('studentExamSelect');
+      sel.innerHTML = '';
+      if (!list || list.length === 0) {
+        selWrap.classList.add('hidden');
+        updateSelectedExamBanner(null);
+        return;
+      }
+      if (list.length === 1) {
+        selWrap.classList.add('hidden');
+        updateSelectedExamBanner(list[0]);
+        return;
+      }
+      list.forEach(function(ex) {
+        var opt = document.createElement('option');
+        opt.value = ex.examId;
+        opt.textContent = ex.title + ' (' + ex.examId + ')';
+        sel.appendChild(opt);
+      });
+      selWrap.classList.remove('hidden');
+      updateSelectedExamBanner(list[0]);
+    }
+
+    function normalizePhone(val) {
+      return String(val || '').replace(/[٠-٩]/g, function(d) { return '٠١٢٣٤٥٦٧٨٩'.indexOf(d); }).replace(/[\s-]/g, '').trim();
+    }
+
+    function getDraftKey(examId, phone) {
+      var ex = examId || state.examId || state.trackKey;
+      var ph = normalizePhone(phone || (state.student && state.student.code) || '');
+      return ph ? ('bahnasy_draft_' + ex + '_' + ph) : STORAGE_KEY;
+    }
+
+    function scrollToTopInstant() {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      requestAnimationFrame(function() {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      });
+      setTimeout(function() {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      }, 45);
+    }
+
+    function formatCairoDate(ts) {
+      if (!ts) return 'غير مسجل';
+      try {
+        var d = new Date(ts);
+        if (isNaN(d.getTime())) return String(ts);
+        return new Intl.DateTimeFormat('ar-EG', {
+          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+          hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Cairo'
+        }).format(d);
+      } catch (e) {
+        return String(ts);
+      }
     }
 
     function saveDraft() {
       if (state.submitted) return;
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        var key = getDraftKey(state.examId, state.student && state.student.code);
+        localStorage.setItem(key, JSON.stringify({
           grade: state.grade,
           track: state.track,
           trackKey: state.trackKey,
+          examId: state.examId,
+          examTitle: state.examTitle,
           student: state.student,
           mcqs: state.mcqs,
           essays: state.essays,
@@ -1478,17 +1637,32 @@
 
     function clearDraft() {
       try {
-        localStorage.removeItem(STORAGE_KEY);
+        var phoneVal = normalizePhone(document.getElementById('studentCode').value || (state.student && state.student.code));
+        localStorage.removeItem(getDraftKey(state.examId, phoneVal));
       } catch (e) {}
     }
 
     function checkSavedDraft() {
       try {
-        var raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return;
+        var banner = document.getElementById('resumeBanner');
+        var phoneVal = normalizePhone(document.getElementById('studentCode').value);
+        if (!/^\d{11}$/.test(phoneVal)) {
+          banner.classList.add('hidden');
+          return;
+        }
+        var raw = localStorage.getItem(getDraftKey(state.examId, phoneVal));
+        if (!raw) {
+          banner.classList.add('hidden');
+          return;
+        }
         var parsed = JSON.parse(raw);
         if (parsed && parsed.mcqs && parsed.mcqs.length > 0 && parsed.student && parsed.student.name) {
-          document.getElementById('resumeBanner').classList.remove('hidden');
+          document.getElementById('resumeText').textContent = state.track === 'ar'
+            ? ('لديك محاولة غير مكتملة محفوظة للرقم ' + phoneVal + ' في هذا الاختبار (' + parsed.student.name + ').')
+            : ('Saved incomplete attempt found for ' + phoneVal + ' (' + parsed.student.name + ').');
+          banner.classList.remove('hidden');
+        } else {
+          banner.classList.add('hidden');
         }
       } catch (e) {}
     }
@@ -1554,7 +1728,7 @@
       document.getElementById('tabMcqBtn').classList.toggle('active', isMcq);
       document.getElementById('tabEssayBtn').classList.toggle('active', !isMcq);
       renderNavigator();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      scrollToTopInstant();
     }
 
     function renderQuestions() {
@@ -1739,6 +1913,7 @@
       var durationSeconds = Math.round((Date.now() - state.startTimeMs) / 1000);
       var payload = {
         trackKey: state.trackKey,
+        examId: state.examId || state.trackKey,
         name: state.student.name,
         code: state.student.code,
         group: state.student.group,
@@ -1825,6 +2000,12 @@
 
     document.getElementById('gradeSelect').addEventListener('change', applyLanguageUI);
     document.getElementById('trackSelect').addEventListener('change', applyLanguageUI);
+    document.getElementById('studentCode').addEventListener('input', checkSavedDraft);
+    document.getElementById('studentExamSelect').addEventListener('change', function() {
+      var val = this.value;
+      var found = state.availableExams.filter(function(e) { return e.examId === val; })[0];
+      if (found) updateSelectedExamBanner(found);
+    });
     document.getElementById('tabMcqBtn').addEventListener('click', function() { switchTab('mcq'); });
     document.getElementById('tabEssayBtn').addEventListener('click', function() { switchTab('essay'); });
     document.getElementById('toEssayBtn').addEventListener('click', function() { switchTab('essay'); });
@@ -1832,7 +2013,8 @@
 
     document.getElementById('resumeBtn').addEventListener('click', function() {
       try {
-        var saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        var phoneVal = normalizePhone(document.getElementById('studentCode').value);
+        var saved = JSON.parse(localStorage.getItem(getDraftKey(state.examId, phoneVal)));
         if (!saved) return;
         document.getElementById('gradeSelect').value = saved.grade || '2nd';
         document.getElementById('trackSelect').value = saved.track || 'ar';
@@ -1850,6 +2032,7 @@
         document.getElementById('examScreen').classList.remove('hidden');
         renderQuestions();
         startTimer();
+        scrollToTopInstant();
       } catch (e) {}
     });
 
@@ -1901,6 +2084,7 @@
         document.getElementById('examScreen').classList.remove('hidden');
         renderQuestions();
         startTimer();
+        scrollToTopInstant();
         return;
       }
 
@@ -1908,17 +2092,20 @@
       startBtn.disabled = true;
       startBtn.textContent = state.track === 'ar' ? 'جاري تحميل الأسئلة...' : 'Loading Exam...';
 
-      fetch(APPS_SCRIPT_URL + '?track=' + encodeURIComponent(state.trackKey))
+      fetch(APPS_SCRIPT_URL + '?action=start_exam&examId=' + encodeURIComponent(state.examId || state.trackKey) + '&code=' + encodeURIComponent(normalizedCode))
         .then(function(r) { return r.json(); })
         .then(function(data) {
-          if (data.status === 'closed') {
+          if (data.status === 'closed' || data.status === 'limit_reached') {
             startBtn.disabled = false;
             startBtn.textContent = I18N[state.track].startBtn;
-            showModal(state.track === 'ar' ? 'الامتحان مغلق' : 'Exam Closed', data.message || 'Closed', [{ label: 'OK', primary: true }]);
+            var ttl = data.status === 'limit_reached'
+              ? (state.track === 'ar' ? 'تم استنفاد المحاولات' : 'Attempt Limit Reached')
+              : (state.track === 'ar' ? 'الامتحان مغلق' : 'Exam Closed');
+            showModal(ttl, data.message || 'Unavailable', [{ label: state.track === 'ar' ? 'حسناً' : 'OK', primary: true }]);
             return;
           }
           if (data.meta) {
-            adminState.configs[state.trackKey] = data.meta;
+            adminState.configs[state.examId || state.trackKey] = data.meta;
           }
           state.mcqs = prepareMcqForSession(data.mcqs || []);
           state.essays = data.essays || [];
@@ -1927,6 +2114,7 @@
           document.getElementById('examScreen').classList.remove('hidden');
           renderQuestions();
           startTimer();
+          scrollToTopInstant();
         })
         .catch(function() {
           startBtn.disabled = false;
@@ -1960,6 +2148,7 @@
     var adminState = {
       password: '',
       trackKey: '2nd_ar',
+      examId: '2nd_ar',
       bankDirty: false,
       geminiKey: '',
       configs: {
@@ -2016,21 +2205,54 @@
       document.getElementById('admTabResults').classList.toggle('active', tab === 'results');
     }
 
-    function loadAdminTrackData() {
-      var g = document.getElementById('adminGradeSelect').value;
-      var t = document.getElementById('adminTrackSelect').value;
-      adminState.trackKey = g + '_' + t;
-      var cfg = adminState.configs[adminState.trackKey] || { title: '', durationMinutes: 30, mcqCount: 16, essayCount: 16, status: 'open' };
-      document.getElementById('cfgTitle').value = cfg.title;
-      document.getElementById('cfgDuration').value = cfg.durationMinutes;
+    function populateAdminExamSelect(preferredId) {
+      var sel = document.getElementById('adminExamSelect');
+      sel.innerHTML = '';
+      var matches = Object.keys(adminState.configs).filter(function(k) {
+        var c = adminState.configs[k];
+        return (c.trackKey || k) === adminState.trackKey;
+      });
+      if (matches.length === 0) {
+        adminState.configs[adminState.trackKey] = {
+          examId: adminState.trackKey, trackKey: adminState.trackKey,
+          title: 'اختبار جديد', durationMinutes: 30, mcqCount: 20, essayCount: 10,
+          mcqPoints: 1, essayPoints: 3, maxAttempts: 1, status: 'open'
+        };
+        matches = [adminState.trackKey];
+      }
+      matches.forEach(function(eid) {
+        var opt = document.createElement('option');
+        opt.value = eid;
+        opt.textContent = (adminState.configs[eid].title || eid) + ' [' + eid + ']';
+        sel.appendChild(opt);
+      });
+      adminState.examId = (preferredId && adminState.configs[preferredId]) ? preferredId : matches[0];
+      sel.value = adminState.examId;
+      document.getElementById('adminExamIdBadge').textContent = 'ID: ' + adminState.examId;
+    }
+
+    function loadAdminExamFields() {
+      var cfg = adminState.configs[adminState.examId] || { title: '', durationMinutes: 30, mcqCount: 16, essayCount: 16, maxAttempts: 1, status: 'open' };
+      document.getElementById('adminExamIdBadge').textContent = 'ID: ' + adminState.examId;
+      document.getElementById('cfgTitle').value = cfg.title || '';
+      document.getElementById('cfgDuration').value = cfg.durationMinutes || 30;
       document.getElementById('cfgMcqCount').value = cfg.mcqCount;
       document.getElementById('cfgEssayCount').value = cfg.essayCount;
       document.getElementById('cfgMcqPoints').value = cfg.mcqPoints || 1;
       document.getElementById('cfgEssayPoints').value = cfg.essayPoints || 2;
-      document.getElementById('cfgStatus').value = cfg.status;
+      document.getElementById('cfgMaxAttempts').value = cfg.maxAttempts !== undefined ? cfg.maxAttempts : 1;
+      document.getElementById('cfgStatus').value = cfg.status || 'open';
       document.getElementById('cfgGeminiKey').value = adminState.geminiKey || '';
       renderAdminBank();
       renderAdminResults();
+    }
+
+    function loadAdminTrackData() {
+      var g = document.getElementById('adminGradeSelect').value;
+      var t = document.getElementById('adminTrackSelect').value;
+      adminState.trackKey = g + '_' + t;
+      populateAdminExamSelect();
+      loadAdminExamFields();
     }
 
     function normalizeForMatch(str) {
@@ -2127,7 +2349,8 @@
     }
 
     function saveBankChanges() {
-      var bank = LOCAL_BANKS[adminState.trackKey] || { mcqs: [], essays: [] };
+      var bank = LOCAL_BANKS[adminState.examId] || { mcqs: [], essays: [] };
+      LOCAL_BANKS[adminState.examId] = bank;
       if (APPS_SCRIPT_URL) {
         fetch(APPS_SCRIPT_URL, {
           method: 'POST',
@@ -2136,6 +2359,7 @@
             action: 'admin_save_bank',
             password: adminState.password,
             trackKey: adminState.trackKey,
+            examId: adminState.examId,
             mcqs: bank.mcqs,
             essays: bank.essays
           })
@@ -2158,7 +2382,8 @@
     function renderAdminBank() {
       var wrap = document.getElementById('adminBankList');
       wrap.innerHTML = '';
-      var bank = LOCAL_BANKS[adminState.trackKey] || { mcqs: [], essays: [] };
+      var bank = LOCAL_BANKS[adminState.examId] || { mcqs: [], essays: [] };
+      LOCAL_BANKS[adminState.examId] = bank;
 
       var mcqHeader = document.createElement('div');
       mcqHeader.style.cssText = 'font-weight:900; color:var(--bg-emerald-dark); margin:8px 0;';
@@ -2356,7 +2581,8 @@
       summary.style.cssText = 'background:var(--bg-emerald-dark); color:#ffffff; padding:16px; border-radius:12px; border:1.5px solid var(--gold); margin-bottom:16px;';
       summary.innerHTML =
         '<div style="font-size:1.1rem; font-weight:900; color:var(--gold); margin-bottom:4px;">👤 ' + sub.name + '</div>' +
-        '<div style="font-size:0.86rem; color:#e2e8f0; margin-bottom:10px;">الهاتف: ' + sub.code + ' • المجموعة: ' + sub.group + ' • خروج التبويب: ' + sub.tabSwitches + '</div>' +
+        '<div style="font-size:0.86rem; color:#e2e8f0; margin-bottom:4px;">الهاتف: ' + sub.code + ' • المجموعة: ' + sub.group + ' • خروج التبويب: ' + sub.tabSwitches + '</div>' +
+        '<div style="font-size:0.84rem; color:#fde68a; font-weight:700; margin-bottom:10px;">🕒 توقيت المحاولة: ' + formatCairoDate(sub.timestamp) + '</div>' +
         '<div style="display:flex; gap:12px; flex-wrap:wrap; border-top:1px dashed rgba(212,175,55,0.4); padding-top:10px; font-weight:800; font-size:0.92rem;">' +
         '<span>الموضوعي: <strong style="color:#ffffff;">' + sub.mcqScore + ' / ' + sub.maxMcq + '</strong></span>' +
         '<span>المقالي: <strong id="detEssayTotal" style="color:#ffffff;">' + sub.essayScore + ' / ' + sub.maxEssay + '</strong></span>' +
@@ -2609,7 +2835,7 @@
       document.getElementById('adminResultsListView').classList.remove('hidden');
       document.getElementById('adminStudentDetailView').classList.add('hidden');
 
-      var subs = adminState.sampleSubmissions.filter(function(s) { return s.trackKey === adminState.trackKey; });
+      var subs = adminState.sampleSubmissions.filter(function(s) { return (s.examId || s.trackKey) === adminState.examId; });
       document.getElementById('kpiTotalSubs').textContent = String(subs.length);
       var avg = subs.length > 0
         ? Math.round(subs.reduce(function(acc, s) {
@@ -2638,6 +2864,7 @@
           '<div>' +
           '<div style="font-weight:900; color:var(--bg-emerald-dark); font-size:0.96rem;">👤 ' + sub.name + '</div>' +
           '<div style="font-size:0.82rem; color:var(--text-muted);">' + sub.code + ' • ' + sub.group + ' • خروج التبويب: ' + sub.tabSwitches + '</div>' +
+          '<div style="font-size:0.78rem; color:#9a7b16; font-weight:700; margin-top:2px;">🕒 ' + formatCairoDate(sub.timestamp) + '</div>' +
           '</div>' +
           '<div style="display:flex; align-items:center; gap:12px;">' +
           '<div style="text-align:center; background:#f0fdf4; border:1px solid #86efac; padding:4px 12px; border-radius:8px;">' +
@@ -2753,6 +2980,29 @@
     });
     document.getElementById('adminGradeSelect').addEventListener('change', loadAdminTrackData);
     document.getElementById('adminTrackSelect').addEventListener('change', loadAdminTrackData);
+    document.getElementById('adminExamSelect').addEventListener('change', function() {
+      adminState.examId = this.value;
+      loadAdminExamFields();
+    });
+    document.getElementById('createNewExamBtn').addEventListener('click', function() {
+      var randId = adminState.trackKey + '_' + Date.now().toString().slice(-6);
+      adminState.configs[randId] = {
+        examId: randId,
+        trackKey: adminState.trackKey,
+        title: 'اختبار جديد (' + randId + ')',
+        durationMinutes: 30,
+        mcqCount: 20,
+        essayCount: 10,
+        mcqPoints: 1,
+        essayPoints: 3,
+        maxAttempts: 1,
+        status: 'open'
+      };
+      LOCAL_BANKS[randId] = { durationMinutes: 30, mcqs: [], essays: [] };
+      populateAdminExamSelect(randId);
+      loadAdminExamFields();
+      showToast('✅ تم إنشاء اختبار جديد بكود: ' + randId + ' — عدّل اسمه واضغط حفظ الإعدادات');
+    });
     document.getElementById('admTabConfig').addEventListener('click', function() { switchAdminTab('config'); });
     document.getElementById('admTabBank').addEventListener('click', function() { switchAdminTab('bank'); });
     document.getElementById('admTabResults').addEventListener('click', function() { switchAdminTab('results'); renderAdminResults(); });
@@ -2771,18 +3021,24 @@
       var essC = Number(document.getElementById('cfgEssayCount').value) || 0;
       var mcqP = Number(document.getElementById('cfgMcqPoints').value) || 1;
       var essP = Number(document.getElementById('cfgEssayPoints').value) || 2;
-      adminState.configs[adminState.trackKey] = {
+      var maxAtt = Number(document.getElementById('cfgMaxAttempts').value);
+      if (isNaN(maxAtt) || maxAtt < 0) maxAtt = 1;
+      adminState.configs[adminState.examId] = {
+        examId: adminState.examId,
+        trackKey: adminState.trackKey,
         title: document.getElementById('cfgTitle').value.trim(),
         durationMinutes: dur,
         mcqCount: mcqC,
         essayCount: essC,
         mcqPoints: mcqP,
         essayPoints: essP,
+        maxAttempts: maxAtt,
         status: document.getElementById('cfgStatus').value
       };
-      if (LOCAL_BANKS[adminState.trackKey]) {
-        LOCAL_BANKS[adminState.trackKey].durationMinutes = dur;
+      if (LOCAL_BANKS[adminState.examId]) {
+        LOCAL_BANKS[adminState.examId].durationMinutes = dur;
       }
+      populateAdminExamSelect(adminState.examId);
       adminState.geminiKey = document.getElementById('cfgGeminiKey').value.trim();
       if (APPS_SCRIPT_URL) {
         fetch(APPS_SCRIPT_URL, {
@@ -2792,7 +3048,8 @@
             action: 'admin_save_config',
             password: adminState.password,
             trackKey: adminState.trackKey,
-            config: adminState.configs[adminState.trackKey]
+            examId: adminState.examId,
+            config: adminState.configs[adminState.examId]
           })
         }).then(function(r) { return r.json(); }).then(function(res) {
           showToast(res.status === 'ok' ? '✅ تم حفظ الإعدادات في Google Sheet' : (res.message || 'خطأ في الحفظ'));
@@ -2809,8 +3066,8 @@
         showToast('اكتب نص السؤال أولاً');
         return;
       }
-      var bank = LOCAL_BANKS[adminState.trackKey];
-      if (!bank) return;
+      var bank = LOCAL_BANKS[adminState.examId] || { durationMinutes: 30, mcqs: [], essays: [] };
+      LOCAL_BANKS[adminState.examId] = bank;
       if (type === 'mcq') {
         var choices = [
           document.getElementById('newC0').value.trim() || 'اختيار 1',
